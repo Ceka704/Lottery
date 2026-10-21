@@ -1,24 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lottery dApp</title>
-<!-- ethers.js kütüphanesi -->
 <script src="https://jsdelivr.net"></script>
 
 <style>
-/* SON GÖNDERDİĞİNİZ GÜNCEL CSS TASARIM KODLARI */
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#14103a;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px 16px 110px;min-height:100vh}
 .wrap{max-width:560px;margin:0 auto}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:8px}
 header h1{font-size:1.3rem}
-a{color:#e0b034}
-button{cursor:pointer;border:0;border-radius:8px;font-weight:700;padding:11px 16px;font-size:.95rem}
+button{cursor:pointer;border:0;border-radius:8px;font-weight:700;padding:11px 16px;font-size:.95rem;transition: opacity 0.2s}
+button:active{opacity: 0.8}
 .gold{background:#e0b034;color:#000}.green{background:#00d85a;color:#000}.grey{background:#2a2552;color:#fff}
 .card{background:#1d1850;border-radius:16px;padding:18px;margin-bottom:16px}
-.card h2{font-size:1.05rem;margin-bottom:8px}
+.card h2{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .pool{text-align:center;font-size:2.6rem;font-weight:800;color:#e0b034}
 .sub{text-align:center;color:#aab;margin-top:4px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;font-size:.9rem;color:#ccd}
@@ -28,9 +27,9 @@ button{cursor:pointer;border:0;border-radius:8px;font-weight:700;padding:11px 16
 .ball.on{background:#e0b034;color:#000}
 .buy{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
 label{display:block;font-size:.8rem;color:#aab;margin:10px 0 4px}
-input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;background:#120e33;color:#fff}
+input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;background:#120e33;color:#fff;font-size:.9rem}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.foot{text-align:center;margin-top:8px;font-size:.85rem}
+#admin{display:none; border: 2px dashed #ff5577} /* Admin paneli varsayılan olarak gizli ve belirgin kırmızı çizgili */
 #msg{display:none;position:fixed;left:0;right:0;bottom:0;z-index:9;padding:14px 16px;text-align:center;font-size:.9rem;background:#0d0a26;border-top:1px solid #3a3470}
 </style>
 </head>
@@ -41,6 +40,7 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
     <button id="connectBtn" class="gold" onclick="connect()">Cüzdanı Bağla</button>
   </header>
 
+  <!-- Havuz ve İstatistikler -->
   <div class="card">
     <div class="pool" id="pool">0</div>
     <div class="sub">TOKN havuzda</div>
@@ -55,7 +55,9 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
     <div class="row"><button class="green" id="claimBtn" onclick="claimPrize()">Ödülü Çek</button></div>
   </div>
 
+  <!-- Bilet Alma Alanı (Herkes Görebilir) -->
   <div class="card">
+    <h2>🎫 Loto Biletleri (1-75)</h2>
     <div class="balls" id="balls"></div>
     <div class="buy">
       <span>Seçilen: <b id="cnt">0</b> • Toplam: <b id="cost">0</b> TOKN</span>
@@ -63,38 +65,47 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
     </div>
   </div>
 
+  <!-- Herkese Açık Oyun Jetonu Deposu (Mint Alanı) -->
+  <div class="card">
+    <h2>🪙 Oyun Jetonu Deposu</h2>
+    <p style="font-size: .85rem; color: #aab;">Buradan kendinize bilet almak için jeton üretebilir veya arkadaşınızın cüzdan adresini yazarak ona oyun jetonu hediye edebilirsiniz.</p>
+    <label>Gönderilecek Cüzdan Adresi (Boş bırakırsanız kendinize gelir)</label>
+    <input id="toAddr" placeholder="0x... (Arkadaşınızın adresi veya boş)">
+    <label>Miktar (TOKN)</label>
+    <input type="number" id="toAmt" value="1000">
+    <div class="row"><button class="gold" style="width:100%" onclick="giveTokens()">Hesaba Oyun Jetonu Yükle</button></div>
+  </div>
+
   <div id="msg"></div>
 
-  <!-- Sadece kontrat sahibi (owner) cüzdanı bağlayınca görünür -->
+  <!-- SADECE KONTARAT SAHİBİNE GÖRÜNEN GÜVENLİ ADMİN PANELİ -->
   <div class="card" id="admin">
-    <h2>⚙️ Admin Paneli</h2>
+    <h2 style="color:#ff5577">⚙️ Kontrat Sahibi Yönetim Paneli</h2>
+    <p style="font-size: .8rem; color: #ffaaaa; margin-bottom: 8px;">Bu paneli sadece siz görebilirsiniz. Sıradan oyuncularda bu alan tamamen gizlidir.</p>
     <label>Bilet fiyatı (TOKN)</label><input type="number" id="newPrice" value="5">
     <label>Tur süresi (gün)</label><input type="number" id="newDays" value="7">
     <label>Komisyon (%)</label><input type="number" id="newCom" value="8">
     <div class="row">
       <button class="gold" onclick="saveSettings()">Ayarları Kaydet</button>
-      <button class="grey" onclick="draw()">Çekilişi Yap</button>
-      <button class="grey" onclick="withdrawFees()">Komisyonu Çek</button>
+      <button class="grey" onclick="draw()">Çekilişi Yap (Kazananı Belirle)</button>
+      <button class="grey" onclick="withdrawFees()">Biriken Komisyonu Çek</button>
     </div>
-    <label>Test tokeni gönder: cüzdan adresi</label><input id="toAddr" placeholder="0x...">
-    <label>Miktar (TOKN)</label><input type="number" id="toAmt" value="1000">
-    <div class="row"><button class="gold" onclick="giveTokens()">Test Tokeni Gönder</button></div>
   </div>
 </div>
 
 <script>
-// ======== BURAYI DOLDURUN ========
+// ======== KONTARAT ADRESLERİNİZİ BURAYA YAZIN ========
 const CFG = {
   LOTTERY: "0xLOTTERY_KONTRAT_ADRESINIZ",
   TOKEN:   "0xTOKEN_ADRESINIZ",
   CHAIN: {
     chainId: "0x61", chainName: "BSC Testnet",
     nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
-    rpcUrls: ["https://binance.org"],
+    rpcUrls: ["https://binance.orgblank"],
     blockExplorerUrls: ["https://bscscan.com"]
   }
 };
-// =================================
+// ====================================================
 
 const LOTTERY_ABI = [
   "function owner() view returns (address)",
@@ -125,13 +136,13 @@ const selected = new Set();
 function msg(t, err) { 
   const m = $('msg'); 
   m.textContent = t; 
-  m.style.display = 'block'; // Yeni tasarımdaki gizli paneli görünür yapmak için eklendi
+  m.style.display = 'block';
   m.style.color = err ? '#ff6688' : '#00e070'; 
 }
 function errText(e) { return e.shortMessage || e.reason || e.message || String(e); }
 function fmt(v) { return Number(ethers.formatUnits(v, dec)).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
 
-// 1-75 top matrisi
+// 1-75 top matrisi oluşturma
 for (let i = 1; i <= 75; i++) {
   const b = document.createElement('div');
   b.className = 'ball'; b.textContent = i;
@@ -161,8 +172,15 @@ async function connect() {
     lottery = new ethers.Contract(CFG.LOTTERY, LOTTERY_ABI, signer);
     token = new ethers.Contract(CFG.TOKEN, TOKEN_ABI, signer);
     dec = Number(await token.decimals());
+    
+    // GÜVENLİK KONTROLÜ: Sadece Owner adresi bağlandığında Admin panelini açar
     const owner = await lottery.owner();
-    $('admin').style.display = owner.toLowerCase() === me.toLowerCase() ? 'block' : 'none';
+    if(owner.toLowerCase() === me.toLowerCase()){
+      $('admin').style.display = 'block';
+    } else {
+      $('admin').style.display = 'none';
+    }
+    
     $('connectBtn').textContent = me.slice(0, 6) + '...' + me.slice(-4);
     await load();
     msg('Bağlandı ✔');
@@ -205,21 +223,3 @@ function buy() {
     const total = price * BigInt(nums.length);
     if ((await token.allowance(me, CFG.LOTTERY)) < total) {
       msg('Token onayı bekleniyor (cüzdanda onaylayın)...');
-      await (await token.approve(CFG.LOTTERY, total)).wait();
-    }
-    await (await lottery.buyTickets(nums)).wait();
-    selected.clear();
-    document.querySelectorAll('.ball.on').forEach(b => b.classList.remove('on'));
-  });
-}
-const claimPrize = () => run('Ödül çekiliyor', async () => (await lottery.claim()).wait());
-const draw = () => run('Çekiliş yapılıyor', async () => (await lottery.drawWinner()).wait());
-const withdrawFees = () => run('Komisyon çekiliyor', async () => (await lottery.withdrawFees()).wait());
-const saveSettings = () => run('Ayarlar kaydediliyor', async () => {
-  const p = ethers.parseUnits($('newPrice').value.toString(), dec);
-  const d = BigInt(Math.round(Number($('newDays').value) * 86400));
-  const c = BigInt($('newCom').value);
-  await (await lottery.updateSettings(p, d, c)).wait();
-});
-const giveTokens = () => run('Test tokeni gönderiliyor', async () => {
-  const to = $('toAddr').value.trim() || me;
