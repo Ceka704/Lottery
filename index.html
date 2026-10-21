@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -29,7 +28,6 @@ button:active{opacity: 0.8}
 label{display:block;font-size:.8rem;color:#aab;margin:10px 0 4px}
 input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;background:#120e33;color:#fff;font-size:.9rem}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-#admin{display:none; border: 2px dashed #ff5577} /* Admin paneli varsayılan olarak gizli ve belirgin kırmızı çizgili */
 #msg{display:none;position:fixed;left:0;right:0;bottom:0;z-index:9;padding:14px 16px;text-align:center;font-size:.9rem;background:#0d0a26;border-top:1px solid #3a3470}
 </style>
 </head>
@@ -68,9 +66,9 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
   <!-- Herkese Açık Oyun Jetonu Deposu (Mint Alanı) -->
   <div class="card">
     <h2>🪙 Oyun Jetonu Deposu</h2>
-    <p style="font-size: .85rem; color: #aab;">Buradan kendinize bilet almak için jeton üretebilir veya arkadaşınızın cüzdan adresini yazarak ona oyun jetonu hediye edebilirsiniz.</p>
-    <label>Gönderilecek Cüzdan Adresi (Boş bırakırsanız kendinize gelir)</label>
-    <input id="toAddr" placeholder="0x... (Arkadaşınızın adresi veya boş)">
+    <p style="font-size: .85rem; color: #aab; margin-bottom: 8px;">Buradan kendinize bilet almak için jeton yükleyebilir veya istediğiniz kişinin cüzdan adresini yazarak ona oyun jetonu verebilirsiniz.</p>
+    <label>Jeton Verilecek Kişinin Cüzdan Adresi (Boş bırakırsanız kendinize gelir)</label>
+    <input id="toAddr" placeholder="0x...">
     <label>Miktar (TOKN)</label>
     <input type="number" id="toAmt" value="1000">
     <div class="row"><button class="gold" style="width:100%" onclick="giveTokens()">Hesaba Oyun Jetonu Yükle</button></div>
@@ -78,8 +76,8 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
 
   <div id="msg"></div>
 
-  <!-- SADECE KONTARAT SAHİBİNE GÖRÜNEN GÜVENLİ ADMİN PANELİ -->
-  <div class="card" id="admin">
+  <!-- SADECE KONTARAT SAHİBİNE GÖRÜNEN GÜVENLİ ADMİN PANELİ (Varsayılan olarak tamamen gizli) -->
+  <div class="card" id="admin" style="display: none; border: 2px dashed #ff5577;">
     <h2 style="color:#ff5577">⚙️ Kontrat Sahibi Yönetim Paneli</h2>
     <p style="font-size: .8rem; color: #ffaaaa; margin-bottom: 8px;">Bu paneli sadece siz görebilirsiniz. Sıradan oyuncularda bu alan tamamen gizlidir.</p>
     <label>Bilet fiyatı (TOKN)</label><input type="number" id="newPrice" value="5">
@@ -94,14 +92,14 @@ input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;backgro
 </div>
 
 <script>
-// ======== KONTARAT ADRESLERİNİZİ BURAYA YAZIN ========
+// ======== KONTRAT ADRESLERİNİZİ BURAYA YAZIN ========
 const CFG = {
   LOTTERY: "0xLOTTERY_KONTRAT_ADRESINIZ",
   TOKEN:   "0xTOKEN_ADRESINIZ",
   CHAIN: {
     chainId: "0x61", chainName: "BSC Testnet",
     nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
-    rpcUrls: ["https://binance.orgblank"],
+    rpcUrls: ["https://binance.org"],
     blockExplorerUrls: ["https://bscscan.com"]
   }
 };
@@ -173,12 +171,12 @@ async function connect() {
     token = new ethers.Contract(CFG.TOKEN, TOKEN_ABI, signer);
     dec = Number(await token.decimals());
     
-    // GÜVENLİK KONTROLÜ: Sadece Owner adresi bağlandığında Admin panelini açar
+    // GÜVENLİK KONTROLÜ: Sadece Owner adresi bağlandığında paneli açar, diğerlerinde kesin olarak kapatır
     const owner = await lottery.owner();
     if(owner.toLowerCase() === me.toLowerCase()){
-      $('admin').style.display = 'block';
+      $('admin').style.setProperty('display', 'block', 'important');
     } else {
-      $('admin').style.display = 'none';
+      $('admin').style.setProperty('display', 'none', 'important');
     }
     
     $('connectBtn').textContent = me.slice(0, 6) + '...' + me.slice(-4);
