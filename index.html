@@ -1,223 +1,231 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lottery dApp</title>
-<script src="https://jsdelivr.net"></script>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mahalle Gazetesi</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#14103a;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px 16px 110px;min-height:100vh}
-.wrap{max-width:560px;margin:0 auto}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:8px}
-header h1{font-size:1.3rem}
-button{cursor:pointer;border:0;border-radius:8px;font-weight:700;padding:11px 16px;font-size:.95rem;transition: opacity 0.2s}
-button:active{opacity: 0.8}
-.gold{background:#e0b034;color:#000}.green{background:#00d85a;color:#000}.grey{background:#2a2552;color:#fff}
-.card{background:#1d1850;border-radius:16px;padding:18px;margin-bottom:16px}
-.card h2{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.pool{text-align:center;font-size:2.6rem;font-weight:800;color:#e0b034}
-.sub{text-align:center;color:#aab;margin-top:4px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;font-size:.9rem;color:#ccd}
-.stats b{color:#fff}
-.balls{display:grid;grid-template-columns:repeat(9,1fr);gap:7px}
-.ball{aspect-ratio:1;border-radius:50%;background:#4b34b8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;cursor:pointer;user-select:none}
-.ball.on{background:#e0b034;color:#000}
-.buy{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
-label{display:block;font-size:.8rem;color:#aab;margin:10px 0 4px}
-input{width:100%;padding:10px;border-radius:6px;border:1px solid #3a3470;background:#120e33;color:#fff;font-size:.9rem}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-#msg{display:none;position:fixed;left:0;right:0;bottom:0;z-index:9;padding:14px 16px;text-align:center;font-size:.9rem;background:#0d0a26;border-top:1px solid #3a3470}
+:root{--bg:#eaf1ef;--card:#fff;--ink:#11201f;--mut:#5a6b69;--ac:#0b6e63;--hi:#f5b700;--bd:#cddbd8;--c1:#0b6e63;--c2:#2457c5;--c3:#d9622b}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1716;--card:#16231f;--ink:#e8f1ee;--mut:#9bb0ac;--ac:#4fd1bd;--hi:#ffcf3d;--bd:#2a3c38;--c1:#4fd1bd;--c2:#7ba2ff;--c3:#ff9a66}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Trebuchet MS",system-ui,sans-serif}
+header{max-width:920px;margin:auto;padding:24px 16px 8px}
+h1{margin:0;font-size:2.2rem;font-weight:800;letter-spacing:-.02em}
+h1 b{background:var(--hi);color:#11201f;padding:0 .25em}
+header p{margin:.3em 0 0;color:var(--mut)}
+nav{max-width:920px;margin:auto;padding:0 12px;display:flex;overflow-x:auto;border-bottom:2px solid var(--ink)}
+nav button{font:inherit;font-weight:700;background:none;border:0;color:var(--mut);padding:10px 14px;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--ink);box-shadow:inset 0 -4px var(--hi)}
+main{max-width:920px;margin:auto;padding:16px}
+section{display:none}section.on{display:block}
+h2{margin:.2em 0 .6em}h3{margin:1.2em 0 .4em}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:14px;margin-bottom:12px}
+.grid .card{margin:0;border-left:5px solid var(--k)}
+#haber{--k:var(--c1)}#spor{--k:var(--c2)}#yemek{--k:var(--c3)}
+.card h4{margin:0 0 .3em;font-size:1.1rem}
+small,.mut{color:var(--mut)}
+input,select{font:inherit;width:100%;padding:10px;margin:4px 0;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--ink)}
+button.b{font:inherit;font-weight:700;width:100%;padding:11px;margin:6px 0;border:0;border-radius:6px;background:var(--ac);color:var(--bg);cursor:pointer}
+button.o{display:block;width:100%;text-align:left;font:inherit;padding:11px;margin:6px 0;border:2px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+button.o:hover,button.o:focus-visible{border-color:var(--ac)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hi)}
+.row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--bd)}
+.row:last-child{border:0}
+.row button{font:inherit;border:1px solid var(--bd);background:none;color:var(--ink);border-radius:6px;cursor:pointer}
+#win{background:var(--hi);color:#11201f;font-size:1.2rem;font-weight:700;border:0}
+.ok{color:var(--ac);font-weight:700}.no{color:var(--c3);font-weight:700}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🔮 LOTTERY</h1>
-    <button id="connectBtn" class="gold" onclick="connect()">Cüzdanı Bağla</button>
-  </header>
+<header><h1>Mahalle <b>Gazetesi</b></h1><p>Haberler, maçlar, tarifler ve herkese açık bilgi yarışması.</p></header>
+<nav id="nav"></nav>
+<main>
+<section id="haber"></section>
+<section id="spor"></section>
+<section id="yemek"></section>
 
-  <!-- Havuz ve İstatistikler -->
-  <div class="card">
-    <div class="pool" id="pool">0</div>
-    <div class="sub">TOKN havuzda</div>
-    <div class="stats">
-      <div>Tur: <b id="round">-</b></div>
-      <div>Kalan süre: <b id="left">-</b></div>
-      <div>Bilet: <b id="price">-</b> TOKN</div>
-      <div>Bakiyem: <b id="bal">-</b> TOKN</div>
-      <div>Önceki kazanan sayı: <b id="prev">-</b></div>
-      <div>Ödülüm: <b id="claim">0</b> TOKN</div>
-    </div>
-    <div class="row"><button class="green" id="claimBtn" onclick="claimPrize()">Ödülü Çek</button></div>
+<section id="yarisma">
+ <p class="mut" id="demo" hidden>Demo modu: veriler sadece bu tarayıcıda durur. Herkesin aynı skoru görmesi için aşağıdaki FIREBASE_CONFIG alanını doldur.</p>
+ <div class="card" id="win" hidden></div>
+ <div class="card">
+  <h2>Bilgi yarışması</h2>
+  <div id="join" hidden><input id="nm" maxlength="20" placeholder="Adın"><button class="b" onclick="join()">Yarışmaya katıl</button></div>
+  <div id="game"></div>
+ </div>
+ <h3>Skor tablosu</h3><div class="card" id="lb"></div>
+ <h3>Canlı kayıt</h3><div class="card" id="log"></div>
+</section>
+
+<section id="admin">
+ <div class="card" id="login"><h2>Admin girişi</h2><input id="pw" type="password" placeholder="Şifre"><button class="b" onclick="login()">Giriş yap</button></div>
+ <div id="panel" hidden>
+  <div class="card"><h2>Soru ekle</h2>
+   <input id="aq" placeholder="Soru">
+   <input class="ao" placeholder="A şıkkı"><input class="ao" placeholder="B şıkkı"><input class="ao" placeholder="C şıkkı"><input class="ao" placeholder="D şıkkı">
+   <select id="ac"><option value="0">Doğru cevap: A</option><option value="1">Doğru cevap: B</option><option value="2">Doğru cevap: C</option><option value="3">Doğru cevap: D</option></select>
+   <button class="b" onclick="addQ()">Soruyu ekle</button>
   </div>
-
-  <!-- Bilet Alma Alanı (Herkes Görebilir) -->
-  <div class="card">
-    <h2>🎫 Loto Biletleri (1-75)</h2>
-    <div class="balls" id="balls"></div>
-    <div class="buy">
-      <span>Seçilen: <b id="cnt">0</b> • Toplam: <b id="cost">0</b> TOKN</span>
-      <button class="green" onclick="buy()">Bilet Al</button>
-    </div>
-  </div>
-
-  <!-- Herkese Açık Oyun Jetonu Deposu (Mint Alanı) -->
-  <div class="card">
-    <h2>🪙 Oyun Jetonu Deposu</h2>
-    <p style="font-size: .85rem; color: #aab; margin-bottom: 8px;">Buradan kendinize bilet almak için jeton yükleyebilir veya istediğiniz kişinin cüzdan adresini yazarak ona oyun jetonu verebilirsiniz.</p>
-    <label>Jeton Verilecek Kişinin Cüzdan Adresi (Boş bırakırsanız kendinize gelir)</label>
-    <input id="toAddr" placeholder="0x...">
-    <label>Miktar (TOKN)</label>
-    <input type="number" id="toAmt" value="1000">
-    <div class="row"><button class="gold" style="width:100%" onclick="giveTokens()">Hesaba Oyun Jetonu Yükle</button></div>
-  </div>
-
-  <div id="msg"></div>
-
-  <!-- SADECE KONTARAT SAHİBİNE GÖRÜNEN GÜVENLİ ADMİN PANELİ (Varsayılan olarak tamamen gizli) -->
-  <div class="card" id="admin" style="display: none; border: 2px dashed #ff5577;">
-    <h2 style="color:#ff5577">⚙️ Kontrat Sahibi Yönetim Paneli</h2>
-    <p style="font-size: .8rem; color: #ffaaaa; margin-bottom: 8px;">Bu paneli sadece siz görebilirsiniz. Sıradan oyuncularda bu alan tamamen gizlidir.</p>
-    <label>Bilet fiyatı (TOKN)</label><input type="number" id="newPrice" value="5">
-    <label>Tur süresi (gün)</label><input type="number" id="newDays" value="7">
-    <label>Komisyon (%)</label><input type="number" id="newCom" value="8">
-    <div class="row">
-      <button class="gold" onclick="saveSettings()">Ayarları Kaydet</button>
-      <button class="grey" onclick="draw()">Çekilişi Yap (Kazananı Belirle)</button>
-      <button class="grey" onclick="withdrawFees()">Biriken Komisyonu Çek</button>
-    </div>
-  </div>
-</div>
+  <div class="card"><h2>Sorular (<span id="qn">0</span>)</h2><div id="ql"></div></div>
+  <button class="b" onclick="resetAll()">Skorları ve kaydı sıfırla</button>
+ </div>
+</section>
+</main>
 
 <script>
-// ======== KONTRAT ADRESLERİNİZİ BURAYA YAZIN ========
-const CFG = {
-  LOTTERY: "0xLOTTERY_KONTRAT_ADRESINIZ",
-  TOKEN:   "0xTOKEN_ADRESINIZ",
-  CHAIN: {
-    chainId: "0x61", chainName: "BSC Testnet",
-    nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
-    rpcUrls: ["https://binance.org"],
-    blockExplorerUrls: ["https://bscscan.com"]
-  }
+/* ---------- AYARLAR ---------- */
+const ADMIN_PASS = "degistir123";   // Admin şifresi: mutlaka değiştir
+const MAX_PLAYERS = 10;             // Yarışmacı sayısı
+const PER_PLAYER = 10;              // Her yarışmacıya çıkacak soru sayısı (rastgele seçilir)
+const FIREBASE_CONFIG = null;       // Firebase ayarını buraya yapıştır: {apiKey:"...", projectId:"...", ...}
+
+/* ---------- İÇERİK (kendi haberlerinle değiştir) ---------- */
+const CONTENT = {
+ haber: [
+  {t:"Belediye yeni park açtı", d:"Mahalle sakinleri için 2 bin metrekarelik yeni yeşil alan hizmete girdi."},
+  {t:"Pazar yeri taşınıyor", d:"Cumartesi pazarı gelecek ay yeni adresinde kurulacak."},
+  {t:"Kütüphane saatleri uzadı", d:"Halk kütüphanesi artık hafta içi 21.00'e kadar açık."}
+ ],
+ spor: [
+  {t:"Derbi hafta sonu", d:"Yerel lig liderliği için iki rakip cumartesi karşılaşıyor."},
+  {t:"Okullar arası turnuva", d:"Voleybol turnuvası için kayıtlar pazartesi başlıyor."},
+  {t:"Sabah koşusu grubu", d:"Her pazar 08.00'de park girişinde buluşuluyor."}
+ ],
+ yemek: [
+  {t:"Mercimek çorbası", d:"1 su bardağı kırmızı mercimek, 1 soğan, 1 havuç, 1 patates, 5 bardak su. Hepsini yumuşayana kadar haşla, blenderdan geçir, tuz ve kimyonla tatlandır."},
+  {t:"Menemen", d:"3 yumurta, 2 domates, 2 biberi zeytinyağında sote et. Yumurtaları kır, karıştırıp 2 dakika pişir."},
+  {t:"Sütlaç", d:"1 litre süt, yarım bardak pirinç, yarım bardak şeker. Pirinci sütle kaynat, şekeri ekle, kaselere doldurup fırınla."}
+ ]
 };
-// ====================================================
 
-const LOTTERY_ABI = [
-  "function owner() view returns (address)",
-  "function ticketPrice() view returns (uint256)",
-  "function currentRound() view returns (uint256)",
-  "function roundEnd() view returns (uint256)",
-  "function pool() view returns (uint256)",
-  "function winningNumber(uint256) view returns (uint256)",
-  "function claimable(address) view returns (uint256)",
-  "function buyTickets(uint256[] nums)",
-  "function drawWinner()",
-  "function claim()",
-  "function withdrawFees()",
-  "function updateSettings(uint256 _price,uint256 _duration,uint256 _commission)"
-];
-const TOKEN_ABI = [
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
-  "function allowance(address,address) view returns (uint256)",
-  "function approve(address,uint256) returns (bool)",
-  "function mint(address,uint256)"
-];
+/* ---------- YARDIMCILAR ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+const shuf = a => a.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+let db, Q = [], P = [], LG = [], fb = '';
 
-const $ = id => document.getElementById(id);
-let me, lottery, token, dec = 18, price = 0n, roundEnd = 0;
-const selected = new Set();
-
-function msg(t, err) { 
-  const m = $('msg'); 
-  m.textContent = t; 
-  m.style.display = 'block';
-  m.style.color = err ? '#ff6688' : '#00e070'; 
-}
-function errText(e) { return e.shortMessage || e.reason || e.message || String(e); }
-function fmt(v) { return Number(ethers.formatUnits(v, dec)).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
-
-// 1-75 top matrisi oluşturma
-for (let i = 1; i <= 75; i++) {
-  const b = document.createElement('div');
-  b.className = 'ball'; b.textContent = i;
-  b.onclick = () => { selected.has(i) ? selected.delete(i) : selected.add(i); b.classList.toggle('on'); updateCost(); };
-  $('balls').appendChild(b);
-}
-function updateCost() {
-  $('cnt').textContent = selected.size;
-  $('cost').textContent = fmt(price * BigInt(selected.size));
+/* ---------- VERİ KATMANI: Firebase varsa ortak, yoksa tarayıcıda ---------- */
+async function initDB() {
+ if (FIREBASE_CONFIG) {
+  const u = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  const { initializeApp } = await import(u + 'firebase-app.js');
+  const F = await import(u + 'firebase-firestore.js');
+  const fs = F.getFirestore(initializeApp(FIREBASE_CONFIG));
+  db = {
+   on: (c, cb) => F.onSnapshot(F.collection(fs, c), s => cb(s.docs.map(d => ({ id: d.id, ...d.data() })))),
+   add: (c, o) => F.addDoc(F.collection(fs, c), o).then(r => r.id),
+   set: (c, id, o) => F.updateDoc(F.doc(fs, c, id), o),
+   del: (c, id) => F.deleteDoc(F.doc(fs, c, id))
+  };
+ } else {
+  $('#demo').hidden = false;
+  const L = {}, get = c => JSON.parse(localStorage.getItem('q_' + c) || '{}');
+  const fire = c => (L[c] || []).forEach(f => f(Object.entries(get(c)).map(([id, o]) => ({ id, ...o }))));
+  const put = (c, o) => { localStorage.setItem('q_' + c, JSON.stringify(o)); fire(c); };
+  addEventListener('storage', e => e.key && e.key.startsWith('q_') && fire(e.key.slice(2)));
+  db = {
+   on: (c, cb) => { (L[c] = L[c] || []).push(cb); fire(c); },
+   add: async (c, o) => { const id = Date.now() + Math.random().toString(36).slice(2, 6), d = get(c); d[id] = o; put(c, d); return id; },
+   set: async (c, id, o) => { const d = get(c); d[id] = { ...d[id], ...o }; put(c, d); },
+   del: async (c, id) => { const d = get(c); delete d[id]; put(c, d); }
+  };
+ }
 }
 
-async function connect() {
-  if (!window.ethereum) return msg('Cüzdan bulunamadı. MetaMask veya Trust Wallet tarayıcısını kullanın.', true);
-  if (!ethers.isAddress(CFG.LOTTERY) || !ethers.isAddress(CFG.TOKEN))
-    return msg('index.html içindeki CFG adreslerini kendi kontrat adreslerinizle değiştirin.', true);
-  try {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CFG.CHAIN.chainId }] });
-    } catch (e) {
-      if (e.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [CFG.CHAIN] });
-      else throw e;
-    }
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    me = await signer.getAddress();
-    lottery = new ethers.Contract(CFG.LOTTERY, LOTTERY_ABI, signer);
-    token = new ethers.Contract(CFG.TOKEN, TOKEN_ABI, signer);
-    dec = Number(await token.decimals());
-    
-    // GÜVENLİK KONTROLÜ: Sadece Owner adresi bağlandığında paneli açar, diğerlerinde kesin olarak kapatır
-    const owner = await lottery.owner();
-    if(owner.toLowerCase() === me.toLowerCase()){
-      $('admin').style.setProperty('display', 'block', 'important');
-    } else {
-      $('admin').style.setProperty('display', 'none', 'important');
-    }
-    
-    $('connectBtn').textContent = me.slice(0, 6) + '...' + me.slice(-4);
-    await load();
-    msg('Bağlandı ✔');
-  } catch (e) { msg(errText(e), true); }
+/* ---------- SEKMELER VE İÇERİK ---------- */
+const TABS = [['haber', 'Haber'], ['spor', 'Spor'], ['yemek', 'Yemek tarifi'], ['yarisma', 'Yarışma'], ['admin', 'Admin']];
+$('#nav').innerHTML = TABS.map(([k, v]) => `<button data-k="${k}">${v}</button>`).join('');
+$('#nav').onclick = e => e.target.dataset.k && show(e.target.dataset.k);
+function show(k) {
+ if (!TABS.some(t => t[0] == k)) k = 'haber';
+ document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id == k));
+ document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.k == k));
+ location.hash = k;
+}
+for (const k in CONTENT) $('#' + k).innerHTML = '<div class="grid">' + CONTENT[k].map(x => `<div class="card"><h4>${esc(x.t)}</h4><span>${esc(x.d)}</span></div>`).join('') + '</div>';
+
+/* ---------- YARIŞMA ---------- */
+const me = () => P.find(p => p.id === localStorage.me);
+const nxt = p => p.qs.find(id => !p.d.includes(id) && Q.some(q => q.id == id));
+
+function render() {
+ const m = me(), full = P.length >= MAX_PLAYERS;
+ $('#join').hidden = !!m || full || !Q.length;
+ let g = '';
+ if (!m) g = full ? `Yarışma dolu (${MAX_PLAYERS}/${MAX_PLAYERS}).` : !Q.length ? 'Henüz soru eklenmedi.' : `${P.length}/${MAX_PLAYERS} kişi katıldı. Adını yazıp katıl.`;
+ else {
+  const id = nxt(m);
+  if (!id) g = fb + `<p>Soruların bitti. Sonucun: <b>${m.c} doğru</b>.</p>`;
+  else {
+   const q = Q.find(q => q.id == id);
+   g = fb + `<p><b>Soru ${m.d.length + 1}/${m.qs.length}</b></p><p>${esc(q.q)}</p>` +
+    q.o.map((o, i) => `<button class="o" onclick="ans('${id}',${i})">${'ABCD'[i]}) ${esc(o)}</button>`).join('');
+  }
+ }
+ $('#game').innerHTML = g;
+
+ const S = [...P].sort((a, b) => b.c - a.c || a.n.localeCompare(b.n));
+ $('#lb').innerHTML = S.length ? S.map((p, i) => `<div class="row"><span>${i + 1}. <b>${esc(p.n)}</b> ${nxt(p) ? '' : '(bitirdi)'}</span><span>${p.c} doğru / ${p.d.length} cevap</span></div>`).join('') : 'Henüz kimse katılmadı.';
+
+ const done = P.length && P.every(p => !nxt(p)), w = $('#win');
+ w.hidden = !done;
+ if (done) w.innerHTML = 'Kazanan: ' + S.filter(p => p.c == S[0].c).map(p => esc(p.n)).join(' ve ') + ` (${S[0].c} doğru)`;
+
+ $('#log').innerHTML = [...LG].sort((a, b) => b.t - a.t).slice(0, 25).map(l => `<div class="row"><span>${esc(l.m)}</span><small>${new Date(l.t).toLocaleTimeString('tr')}</small></div>`).join('') || 'Henüz kayıt yok.';
 }
 
-async function load() {
-  const [round, p, pool, end, bal, cl] = await Promise.all([
-    lottery.currentRound(), lottery.ticketPrice(), lottery.pool(), lottery.roundEnd(),
-    token.balanceOf(me), lottery.claimable(me)
-  ]);
-  price = p; roundEnd = Number(end);
-  $('round').textContent = round.toString();
-  $('price').textContent = fmt(p);
-  $('pool').textContent = fmt(pool);
-  $('bal').textContent = fmt(bal);
-  $('claim').textContent = fmt(cl);
-  $('prev').textContent = round > 1n ? (await lottery.winningNumber(round - 1n)).toString() : '-';
-  updateCost();
+async function join() {
+ const n = $('#nm').value.trim();
+ if (!n || P.length >= MAX_PLAYERS) return;
+ if (P.some(p => p.n.toLowerCase() == n.toLowerCase())) return alert('Bu isim alınmış, başka bir isim yaz.');
+ const qs = shuf(Q.map(q => q.id)).slice(0, PER_PLAYER);
+ localStorage.me = await db.add('players', { n, qs, d: [], c: 0 });
+ await db.add('log', { t: Date.now(), m: `${n} yarışmaya katıldı (${qs.length} soru)` });
+ render();
 }
 
-setInterval(() => {
-  if (!roundEnd) return;
-  const s = roundEnd - Math.floor(Date.now() / 1000);
-  if (s <= 0) { $('left').textContent = 'Tur bitti'; return; }
-  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-  $('left').textContent = `${d}g ${h}s ${m}dk ${s % 60}sn`;
-}, 1000);
-
-async function run(label, fn) {
-  if (!lottery) return msg('Önce cüzdanı bağlayın.', true);
-  try { msg(label + '...'); await fn(); msg('Başarılı ✔'); await load(); }
-  catch (e) { msg(errText(e), true); }
+async function ans(id, i) {
+ const m = me(), q = Q.find(q => q.id == id);
+ if (!m || !q || m.d.includes(id)) return;
+ const ok = q.a == i, c = m.c + +ok;
+ fb = ok ? '<p class="ok">Doğru!</p>' : `<p class="no">Yanlış. Doğru cevap: ${'ABCD'[q.a]}) ${esc(q.o[q.a])}</p>`;
+ await db.set('players', m.id, { d: [...m.d, id], c });
+ await db.add('log', { t: Date.now(), m: `${m.n}, ${m.d.length + 1}. soruyu ${ok ? 'doğru' : 'yanlış'} cevapladı (toplam ${c} doğru)` });
 }
 
-function buy() {
-  if (!selected.size) return msg('En az bir sayı seçin.', true);
-  run('Bilet alınıyor', async () => {
-    const nums = [...selected];
-    const total = price * BigInt(nums.length);
-    if ((await token.allowance(me, CFG.LOTTERY)) < total) {
-      msg('Token onayı bekleniyor (cüzdanda onaylayın)...');
+/* ---------- ADMIN ---------- */
+const isA = () => sessionStorage.adm == '1';
+function login() {
+ if ($('#pw').value == ADMIN_PASS) { sessionStorage.adm = 1; adm(); } else alert('Şifre yanlış.');
+}
+function adm() {
+ $('#login').hidden = isA();
+ $('#panel').hidden = !isA();
+ $('#qn').textContent = Q.length;
+ $('#ql').innerHTML = Q.map(q => `<div class="row"><span>${esc(q.q)} <small>(doğru: ${'ABCD'[q.a]})</small></span><button onclick="db.del('questions','${q.id}')">Sil</button></div>`).join('') || 'Soru yok.';
+}
+async function addQ() {
+ const q = $('#aq').value.trim(), o = [...document.querySelectorAll('.ao')].map(x => x.value.trim());
+ if (!q || o.some(x => !x)) return alert('Soruyu ve 4 şıkkı da doldur.');
+ await db.add('questions', { q, o, a: +$('#ac').value });
+ $('#aq').value = ''; document.querySelectorAll('.ao').forEach(x => x.value = '');
+}
+function resetAll() {
+ if (!confirm('Tüm yarışmacılar ve kayıtlar silinecek. Emin misin?')) return;
+ P.forEach(p => db.del('players', p.id));
+ LG.forEach(l => db.del('log', l.id));
+ localStorage.removeItem('me'); fb = '';
+}
+
+/* ---------- BAŞLAT ---------- */
+(async () => {
+ await initDB();
+ db.on('questions', a => { Q = a; render(); adm(); });
+ db.on('players', a => { P = a; render(); });
+ db.on('log', a => { LG = a; render(); });
+ show(location.hash.slice(1));
+})();
+</script>
+</body>
+</html>
